@@ -1,0 +1,10 @@
+{
+  "name": "mew",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.17",
+    "tailwindcss-scoped-preflight": "^3.4.12"
+  }
+}
