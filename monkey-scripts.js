@@ -1,13 +1,160 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div id="aaf">
+// ==UserScript==
+// @name         Jubayer Script
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @author       Jubayer
+// @match        https://payment.ivacbd.com/*
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(function () {
+  ("use strict");
+
+  function initPanelScripts() {
+    function initTogglePanel() {
+      const showPanelBtnEl = document.querySelector("#aaf-show-panel");
+      const closePanelBtnEl = document.querySelector("#aaf-close-panel");
+      const panelWrapperEl = document.querySelector("#aaf-panel-wrapper");
+
+      function showPanel() {
+        panelWrapperEl.classList.remove("aaf-hidden");
+        panelWrapperEl.classList.add("aaf-fixed");
+      }
+      function hidePanel() {
+        panelWrapperEl.classList.add("aaf-hidden");
+        panelWrapperEl.classList.remove("aaf-fixed");
+      }
+
+      showPanelBtnEl.addEventListener("click", showPanel);
+      closePanelBtnEl.addEventListener("click", hidePanel);
+    }
+
+    function initTabs() {
+      const tabsEls = document.querySelectorAll("#aaf-tabs > button");
+      const formsEls = document.querySelectorAll("#aaf-sections > section");
+
+      tabsEls[0].classList.add(
+        "active",
+        "aaf-border-b-2",
+        "aaf-border-red-700",
+        "aaf-text-red-700"
+      );
+
+      tabsEls.forEach((tab, index) => {
+        tab.addEventListener("click", () => {
+          // Remove active class from all tabs
+          tabsEls.forEach((t) =>
+            t.classList.remove(
+              "active",
+              "aaf-border-b-2",
+              "aaf-border-red-700",
+              "aaf-text-red-700"
+            )
+          );
+          // Add active class to clicked tab
+          tab.classList.add(
+            "active",
+            "aaf-border-b-2",
+            "aaf-border-red-700",
+            "aaf-text-red-700"
+          );
+
+          // Hide all formsEls
+          formsEls.forEach((form) => form.classList.add("aaf-hidden"));
+          // Show the form matching the clicked tab
+          formsEls[index].classList.remove("aaf-hidden");
+        });
+      });
+    }
+
+    function initLoginSection() {
+      const mobileNumberInputEl = document.querySelector(
+        "#aaf-login-section-mobile-number-input"
+      );
+      const passwordInputEl = document.querySelector(
+        "#aaf-login-section-password-input"
+      );
+      const otpInputEl = document.querySelector("#aaf-login-section-otp-input");
+
+      const sendOTPBtnEl = document.querySelector(
+        "#aaf-login-section-send-otp-btn"
+      );
+
+      const verifyMobileBtnEl = document.querySelector(
+        "#aaf-login-section-verify-mobile-btn"
+      );
+      const loginBtnEl = document.querySelector("#aaf-login-section-login-btn");
+
+      // 1) Send OTP
+      function sendOtp() {
+        const mobile = mobileNumberInputEl.value.trim();
+
+        if (!mobile) {
+          alert("Please enter mobile number.");
+          return;
+        }
+
+        // Example request (replace with real API call)
+        console.log("Sending OTP to:", mobile);
+
+        // fetch("/api/send-otp", { method: "POST", body: JSON.stringify({ mobile }) })
+        //   .then(res => res.json())
+        //   .then(data => console.log("OTP Sent:", data));
+      }
+
+      // 2) Verify OTP
+      function verifyOTP() {
+        const mobile = mobileNumberInputEl.value.trim();
+        const otp = otpInputEl.value.trim();
+
+        if (!mobile || !otp) {
+          alert("Please enter both mobile number and OTP code.");
+          return;
+        }
+
+        console.log("Verifying OTP:", { mobile, otp });
+
+        // fetch("/api/verify-otp", { method: "POST", body: JSON.stringify({ mobile, otp }) })
+        //   .then(res => res.json())
+        //   .then(data => console.log("OTP Verified:", data));
+      }
+
+      // 3) Login
+      function login() {
+        const mobile = mobileNumberInputEl.value.trim();
+        const password = passwordInputEl.value.trim();
+        const otp = otpInputEl.value.trim();
+
+        if (!mobile || !password || !otp) {
+          alert("Please enter mobile, password, and OTP.");
+          return;
+        }
+
+        console.log("Logging in:", { mobile, password, otp });
+
+        // fetch("/api/login", { method: "POST", body: JSON.stringify({ mobile, password, otp }) })
+        //   .then(res => res.json())
+        //   .then(data => console.log("Login successful:", data));
+      }
+
+      // Attach to buttons
+      sendOTPBtnEl.addEventListener("click", sendOtp);
+      verifyMobileBtnEl.addEventListener("click", verifyOTP);
+      loginBtnEl.addEventListener("click", login);
+    }
+    initTogglePanel();
+    initTabs();
+    initLoginSection();
+  }
+
+  function renderPanelDOM() {
+    // Prevent duplicate creation
+    if (document.getElementById("aaf")) return;
+
+    const html = `
+
+
+ <div id="aaf">
       <!-- Toggle Button -->
       <button
         id="aaf-show-panel"
@@ -313,6 +460,143 @@
       </div>
     </div>
 
-    <script src="script.js"></script>
-  </body>
-</html>
+  `;
+
+    document.body.insertAdjacentHTML("beforeend", html);
+  }
+
+  function onReady() {
+    GM_addStyle(`
+
+/* ===== Base ===== */
+.aaf-hidden { display: none !important; }
+.aaf-block { display: block !important; }
+.aaf-flex { display: flex !important; }
+.aaf-inline-flex { display: inline-flex !important; }
+.aaf-items-center { align-items: center !important; }
+.aaf-justify-center { justify-content: center !important; }
+.aaf-flex-wrap { flex-wrap: wrap !important; }
+.aaf-gap-2 { gap: 0.5rem !important; }
+.aaf-space-y-4 > * + * { margin-top: 1rem !important; }
+.aaf-overflow-y-scroll { overflow-y: scroll !important; }
+.aaf-relative { position: relative !important; }
+.aaf-absolute { position: absolute !important; }
+.aaf-fixed { position: fixed !important; }
+.aaf-inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.aaf-top-0 { top: 0 !important; }
+.aaf-right-0 { right: 0 !important; }
+.aaf-right-2\\.5 { right: 0.625rem !important; }
+.aaf-bottom-5 { bottom: 1.25rem !important; }
+.aaf-right-5 { right: 1.25rem !important; }
+.-aaf-top-3 { top: -0.75rem !important; }
+.-aaf-right-3 { right: -0.75rem !important; }
+.aaf-cursor-pointer { cursor: pointer !important; }
+
+/* ===== Sizing ===== */
+.aaf-w-full { width: 100% !important; }
+.aaf-h-full { height: 100% !important; }
+.aaf-max-w-sm { max-width: 24rem !important; }
+.aaf-w-\\[90\\%\\] { width: 90% !important; }
+.aaf-w-\\[50px\\] { width: 50px !important; }
+.aaf-h-\\[50px\\] { height: 50px !important; }
+.aaf-size-7 { width: 1.75rem !important; height: 1.75rem !important; }
+.aaf-max-h-\\[calc\\(100vh-250px\\)\\] { max-height: calc(100vh - 250px) !important; }
+
+/* ===== Flex ===== */
+.aaf-flex-1 { flex: 1 1 0% !important; }
+
+/* ===== Spacing ===== */
+.aaf-p-2 { padding: 0.5rem !important; }
+.aaf-p-3 { padding: 0.75rem !important; }
+.aaf-p-4 { padding: 1rem !important; }
+.aaf-py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+.aaf-my-3 { margin-top: 0.75rem !important; margin-bottom: 0.75rem !important; }
+.aaf-mb-1 { margin-bottom: 0.25rem !important; }
+.aaf-mb-2 { margin-bottom: 0.5rem !important; }
+.aaf-mb-3 { margin-bottom: 0.75rem !important; }
+
+/* ===== Text ===== */
+.aaf-text-center { text-align: center !important; }
+.aaf-text-sm { font-size: 0.875rem !important; }
+.aaf-text-\\[20px\\] { font-size: 20px !important; }
+.aaf-font-semibold { font-weight: 600 !important; }
+.aaf-font-bold { font-weight: 700 !important; }
+
+/* ===== Rounded & Borders ===== */
+.aaf-rounded { border-radius: 0.25rem !important; }
+.aaf-rounded-full { border-radius: 9999px !important; }
+.aaf-rounded-lg { border-radius: 0.5rem !important; }
+.aaf-border { border-width: 1px !important; border-style: solid !important; }
+.aaf-border-2 { border-width: 2px !important; border-style: solid !important; }
+.aaf-border-b { border-bottom-width: 1px !important; border-bottom-style: solid !important; }
+.aaf-border-b-2 { border-bottom-width: 2px !important; border-bottom-style: solid !important; }
+.aaf-border-none { border: none !important; }
+.aaf-border-gray-200 { border-color: #e5e7eb !important; }
+.aaf-border-gray-300 { border-color: #d1d5db !important; }
+.aaf-border-gray-400 { border-color: #9ca3af !important; }
+.aaf-border-red-700 { border-color: #b91c1c !important; }
+.aaf-border-dotted { border-style: dotted !important; }
+.aaf-box-border { box-sizing: border-box !important; }
+
+/* ===== Backgrounds ===== */
+.aaf-bg-white { background-color: #ffffff !important; }
+.aaf-bg-black\\/50 { background-color: rgba(0,0,0,0.5) !important; }
+.aaf-bg-red-600 { background-color: #dc2626 !important; }
+.aaf-bg-red-700 { background-color: #b91c1c !important; }
+.aaf-bg-red-800 { background-color: #991b1b !important; }
+.aaf-bg-red-900 { background-color: #7f1d1d !important; }
+.aaf-bg-gray-600 { background-color: #4b5563 !important; }
+.aaf-bg-gray-800 { background-color: #1f2937 !important; }
+.aaf-bg-yellow-500 { background-color: #f59e0b !important; }
+.aaf-bg-yellow-600 { background-color: #d97706 !important; }
+.aaf-bg-green-600 { background-color: #16a34a !important; }
+.aaf-bg-green-800 { background-color: #166534 !important; }
+
+/* ===== Gradient ===== */
+.aaf-bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--aaf-from, #000), var(--aaf-to, #fff)) !important; }
+.aaf-from-red-900 { --aaf-from: #7f1d1d; }
+.aaf-to-red-700 { --aaf-to: #b91c1c; }
+
+/* ===== Text Colors ===== */
+.aaf-text-white { color: #ffffff !important; }
+.aaf-text-gray-600 { color: #4b5563 !important; }
+.aaf-text-gray-700 { color: #374151 !important; }
+.aaf-text-red-700 { color: #b91c1c !important; }
+.aaf-text-\\[\\#51337f\\] { color: #51337f !important; }
+
+/* ===== Effects ===== */
+.aaf-shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05) !important; }
+.aaf-transition-all { transition: all 0.3s ease !important; }
+.aaf-duration-300 { transition-duration: 300ms !important; }
+
+/* ===== Focus States ===== */
+.aaf-outline-none { outline: none !important; }
+.focus\\:aaf-border-\\[\\#005d96\\]:focus { border-color: #005d96 !important; }
+.focus\\:aaf-ring-1:focus { box-shadow: 0 0 0 1px currentColor !important; }
+.focus\\:aaf-ring-indigo-500:focus { box-shadow: 0 0 0 1px #6366f1 !important; }
+.focus\\:aaf-border-indigo-500:focus { border-color: #6366f1 !important; }
+
+/* ===== Hover States ===== */
+.hover\\:aaf-bg-red-700:hover { background-color: #b91c1c !important; }
+.hover\\:aaf-bg-red-800:hover { background-color: #991b1b !important; }
+.hover\\:aaf-bg-red-900:hover { background-color: #7f1d1d !important; }
+.hover\\:aaf-bg-gray-800:hover { background-color: #1f2937 !important; }
+.hover\\:aaf-bg-yellow-600:hover { background-color: #d97706 !important; }
+.hover\\:aaf-bg-green-800:hover { background-color: #166534 !important; }
+
+/* ===== Z-index ===== */
+.aaf-z-\\[100001\\] { z-index: 100001 !important; }
+
+
+    `);
+    renderPanelDOM();
+    initPanelScripts();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", onReady);
+  } else {
+    // DOM already ready (happens when the userscript runs too late)
+    onReady();
+  }
+})();
